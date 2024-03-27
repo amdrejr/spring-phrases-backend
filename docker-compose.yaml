@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: phrases-project-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: phrases-project
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+# user: root
