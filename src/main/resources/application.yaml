@@ -9,7 +9,7 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     properties:
       show-sql: true
     open-in-view: true

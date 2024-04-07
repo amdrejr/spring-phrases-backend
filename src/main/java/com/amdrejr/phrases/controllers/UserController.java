@@ -18,15 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.amdrejr.phrases.dto.AuthResponse;
 import com.amdrejr.phrases.dto.UserDTO;
 import com.amdrejr.phrases.entities.Role;
 import com.amdrejr.phrases.entities.User;
 import com.amdrejr.phrases.exceptions.customExceptions.UsernameAlreadyExistsExceprion;
-import com.amdrejr.phrases.security.UserCredentials;
 import com.amdrejr.phrases.services.RoleService;
 import com.amdrejr.phrases.services.UserService;
-import com.amdrejr.phrases.services.security.AuthenticationService;
 
 @RestController
 @RequestMapping("/users")
@@ -35,69 +32,55 @@ public class UserController {
     private UserService userService;
     @Autowired
     private RoleService roleService;
-
-    @Autowired
-    private AuthenticationService authenticationService;
-
+    
     // Encriptador de senhas
 	BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<UserDTO>> getUsers() {
+        List<UserDTO> users = new ArrayList<>();
 
-        // isso está diretamente ligado com "User findByUsername(String username);"
-        // de UserRepository
-        User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        // se admin, retorna todos os usuários
-        if(actualUser.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"))) {
-            return ResponseEntity.ok().body(userService.findAll());
-        } else { // se não, retorna apenas o usuário logado
-            return ResponseEntity.ok().body(List.of(actualUser));
+        for(User user : userService.findAll()) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setUsername(user.getUsername());
+            userDTO.setPhrases(user.getPhrases());
+            users.add(userDTO);
         }
+
+        return ResponseEntity.ok().body(users);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getMe() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok().body(userService.findById(user.getId()));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         return ResponseEntity.ok().body(userService.findById(id));
     }
 
     @PostMapping // testar se está funcionando corretamente
-    public ResponseEntity<AuthResponse> create(@RequestBody @NonNull UserDTO user) {
-        User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<User> create(@RequestBody @NonNull UserDTO user) {
         if(userService.findByUsername(user.getUsername()) != null) {
             throw new UsernameAlreadyExistsExceprion("Username already exists.");
         }
 
         User newUser = new User();
-
-        if(actualUser.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"))) {
-            newUser.setUsername(user.getUsername());
-            newUser.setPassword(encoder.encode(user.getPassword()));
-            newUser.setRoles(List.of(roleService.findById(user.getRoleId())));
-            newUser.setAccountNonExpired(true);
-            newUser.setAccountNonLocked(true);
-            newUser.setCredentialsNonExpired(true);
-            newUser.setEnabled(true);
-        } else {
-            // apenas Users Admins podem criar usuários com roles além de ROLE_USER
-            newUser.setUsername(user.getUsername());
-            newUser.setPassword(encoder.encode(user.getPassword()));
-            newUser.setRoles(List.of(roleService.findById(10))); // 10 = ROLE_USER
-            newUser.setAccountNonExpired(true);
-            newUser.setAccountNonLocked(true);
-            newUser.setCredentialsNonExpired(true);
-            newUser.setEnabled(true);
-        }
+        newUser.setUsername(user.getUsername());
+        newUser.setPassword(encoder.encode(user.getPassword()));
+        newUser.setRoles(List.of(roleService.findById(user.getRoleId())));
+        newUser.setAccountNonExpired(true);
+        newUser.setAccountNonLocked(true);
+        newUser.setCredentialsNonExpired(true);
+        newUser.setEnabled(true);
         
         userService.save(newUser);
 
-        UserCredentials userCredentials = new UserCredentials(newUser.getUsername(), user.getPassword());
-        String token = authenticationService.signin(userCredentials);
-
-        return ResponseEntity.created(null).body(new AuthResponse(token));
+        return ResponseEntity.ok().body(newUser);
     }
 
     @DeleteMapping(value = "/{id}")

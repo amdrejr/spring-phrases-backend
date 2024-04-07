@@ -1,4 +1,4 @@
-package com.amdrejr.phrases.dto;
+package com.amdrejr.phrases.dto.security;
 
 public class AuthResponse {
     private String token;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.amdrejr.phrases.exceptions.customExceptions.PhrasesErrorException;
 import com.amdrejr.phrases.exceptions.customExceptions.UserInexistentOrInvalidPassword;
 import com.amdrejr.phrases.exceptions.customExceptions.UsernameAlreadyExistsExceprion;
 
@@ -53,6 +54,15 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         String errMsg = "Error create user.";
         StandardError re = new StandardError(Instant.now(), status.value(), errMsg, err.getMessage(), req.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(re);
+    }
+    
+    @ExceptionHandler({PhrasesErrorException.class})
+    @ResponseBody
+    public ResponseEntity<StandardError> phrasesError(PhrasesErrorException err, HttpServletRequest req) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        String errMsg = "Error phrases.";
+        StandardError re = new StandardError(Instant.now(), status.value(), errMsg, err.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(re);
     }
 
     @ExceptionHandler({RuntimeException.class})

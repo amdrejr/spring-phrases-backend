@@ -37,7 +37,12 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         var corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:4200"));
+        corsConfig.setAllowedOrigins(List.of(
+            "http://localhost:3000/",
+            "http://localhost:4200/",
+            "http://localhost:3000/**",
+            "http://localhost:4200/**"
+        ));
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setAllowCredentials(true);

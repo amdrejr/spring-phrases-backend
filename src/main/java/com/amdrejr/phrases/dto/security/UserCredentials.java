@@ -1,4 +1,4 @@
-package com.amdrejr.phrases.security;
+package com.amdrejr.phrases.dto.security;
 
 public class UserCredentials {
     private String username;

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.amdrejr.phrases.dto.UserDTO;
 import com.amdrejr.phrases.entities.User;
 import com.amdrejr.phrases.repositories.UserRepository;
 
@@ -20,11 +19,10 @@ public class UserService {
             repository.save(u);
     }
 
-    public void save(UserDTO u) {
-        User user = new User(u.getUsername(), u.getPassword(), u.getRoleId());
-
-        repository.save(user);
-    }
+    // public void save(UserDTO u) {
+    //     User user = new User(u.getUsername(), u.getPassword(), u.getRoleId());
+    //     repository.save(user);
+    // }
 
     public User findByUsername(String username) {
         return repository.findByUsername(username);

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 // Entidade User, será usado seus params para login.
@@ -38,6 +40,7 @@ public class User implements UserDetails {
     @Column(name = "credentials_non_expired")
     @JsonIgnore
     private Boolean credentialsNonExpired;
+    @JsonIgnore
     private Boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -45,7 +48,11 @@ public class User implements UserDetails {
                 joinColumns = @JoinColumn(name = "user_id"),
                 inverseJoinColumns = @JoinColumn(name = "role_id") )
     @JsonIgnore
-    private List<Role> roles;    
+    private List<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // @JsonManagedReference
+    private List<Phrase> phrases;
 
     public User() { }
 
@@ -135,8 +142,12 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
+    public List<Phrase> getPhrases() {
+        return phrases;
+    }
 
     // UserDetails métodos
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // return List.of(new SimpleGrantedAuthority("ADMIN"));
