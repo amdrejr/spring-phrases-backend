@@ -51,6 +51,8 @@ public class UserService {
         entity.setCredentialsNonExpired(u.getCredentialsNonExpired());
         entity.setEnabled(u.getEnabled());
         entity.setRoles(u.getRoles());
+        entity.setFollowers(u.getFollowers());
+        entity.setFollowing(u.getFollowing());
 
         repository.save(entity);
         return entity;

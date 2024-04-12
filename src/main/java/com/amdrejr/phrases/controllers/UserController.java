@@ -45,6 +45,8 @@ public class UserController {
             userDTO.setId(user.getId());
             userDTO.setUsername(user.getUsername());
             userDTO.setPhrases(user.getPhrases());
+            userDTO.setAllFollowers(user.getAllFollowers());
+            userDTO.setAllFollowing(user.getAllFollowing());
             users.add(userDTO);
         }
 
@@ -52,19 +54,21 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getMe() {
+    public ResponseEntity<UserDTO> getMe() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok().body(userService.findById(user.getId()));
+        UserDTO dto = new UserDTO( userService.findById(user.getId()) );
+
+        return ResponseEntity.ok().body(dto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok().body(userService.findById(id));
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok().body(new UserDTO(userService.findById(id)));
     }
 
     @PostMapping // testar se está funcionando corretamente
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<User> create(@RequestBody @NonNull UserDTO user) {
+    public ResponseEntity<UserDTO> create(@RequestBody @NonNull User user) {
         if(userService.findByUsername(user.getUsername()) != null) {
             throw new UsernameAlreadyExistsExceprion("Username already exists.");
         }
@@ -72,7 +76,7 @@ public class UserController {
         User newUser = new User();
         newUser.setUsername(user.getUsername());
         newUser.setPassword(encoder.encode(user.getPassword()));
-        newUser.setRoles(List.of(roleService.findById(user.getRoleId())));
+        newUser.setRoles(List.of(roleService.findById(user.getRoles().get(0).getId())));
         newUser.setAccountNonExpired(true);
         newUser.setAccountNonLocked(true);
         newUser.setCredentialsNonExpired(true);
@@ -80,7 +84,7 @@ public class UserController {
         
         userService.save(newUser);
 
-        return ResponseEntity.ok().body(newUser);
+        return ResponseEntity.ok().body(new UserDTO(newUser));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -92,21 +96,22 @@ public class UserController {
 
     @PutMapping("/{id}") // adm atualizar role e enabled de outros usuários
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO obj) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody User obj) {
         User user = userService.findById(id);
         
         List<Role> roles = new ArrayList<>();
-        roles.add(roleService.findById(obj.getRoleId()));
+        roles.add(roleService.findById(obj.getRoles().get(0).getId()));
         user.setRoles(roles);
         
         user.setEnabled(obj.getEnabled());
 
         userService.update(user);
-        return ResponseEntity.ok().body(obj);
+
+        return ResponseEntity.ok().body(new UserDTO(obj));
     }
 
     @PutMapping // atualizar própria senha
-    public ResponseEntity<UserDTO> update(@RequestBody UserDTO obj) {
+    public ResponseEntity<UserDTO> update(@RequestBody User obj) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = new User();
 
@@ -116,6 +121,31 @@ public class UserController {
         userService.update(user);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/follow")
+    public ResponseEntity<UserDTO> follow(@PathVariable Long id) {
+        User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findById(id);
+
+        if(actualUser.getId() == user.getId()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if(actualUser.getFollowing().contains(user)) {
+            actualUser.getFollowing().remove(user);
+            user.getFollowers().remove(actualUser);
+        } else {
+            actualUser.getFollowing().add(user);
+            user.getFollowers().add(actualUser);
+        }
+        
+        userService.update(user);
+        userService.update(actualUser);
+
+        UserDTO userBack = new UserDTO(userService.findById(actualUser.getId()));
+
+        return ResponseEntity.ok().body(userBack);
     }
 }
 

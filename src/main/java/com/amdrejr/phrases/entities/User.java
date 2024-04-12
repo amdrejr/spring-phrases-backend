@@ -1,8 +1,13 @@
 package com.amdrejr.phrases.entities;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,9 +55,23 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Role> roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     // @JsonManagedReference
     private List<Phrase> phrases;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_following",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private Set<User> following = new HashSet<>();
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "following")
+    private Set<User> followers = new HashSet<>();
+
 
     public User() { }
 
@@ -144,6 +163,50 @@ public class User implements UserDetails {
 
     public List<Phrase> getPhrases() {
         return phrases;
+    }
+
+    public Set<User> getFollowing() {
+        return following;
+    }
+    
+    public void setFollowing(Set<User> following) {
+        this.following = following;
+    }
+
+    public Set<User> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<User> followers) {
+        this.followers = followers;
+    }
+
+    public List<Map<String, Object>> getAllFollowing() {
+        // Evitar recursão infinita
+        List<Map<String, Object>> following = new ArrayList<>();
+        
+        for (User user : this.following) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("username", user.getUsername());
+            following.add(userMap);
+        }
+
+        return following;
+    }
+
+    public List<Map<String, Object>> getAllFollowers() {
+        // Evitar recursão infinita
+        List<Map<String, Object>> followers = new ArrayList<>();
+        
+        for (User user : this.followers) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("username", user.getUsername());
+            followers.add(userMap);
+        }
+
+        return followers;
     }
 
     // UserDetails métodos

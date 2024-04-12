@@ -3,6 +3,7 @@ package com.amdrejr.phrases.controllers;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -100,6 +101,18 @@ public class PhraseController {
 
         phraseService.save(phrase);
         return ResponseEntity.ok().body(phrase);
+    }
+
+    @GetMapping("/following")
+    public ResponseEntity<List<PhraseDTO>> getFollowingPhrases() {
+        User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<PhraseDTO> followingPhrases = actualUser.getFollowing().stream()
+            .flatMap(u -> u.getPhrases().stream())
+            .map(PhraseDTO::new)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(followingPhrases);
     }
 
 }

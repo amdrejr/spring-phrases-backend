@@ -1,20 +1,20 @@
 package com.amdrejr.phrases.dto;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.amdrejr.phrases.entities.Phrase;
+import com.amdrejr.phrases.entities.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class UserDTO {
+public class UserDTO implements Serializable {
     private Long id;
     private String username;
     @JsonIgnore
-    private String password;
     private List<Phrase> phrases;
-    @JsonIgnore
-    private Integer roleId;
-    @JsonIgnore
-    private boolean enabled;
+    private List<Map<String, Object>> allFollowers;
+    private List<Map<String, Object>> allFollowing;
 
     public UserDTO() { }
 
@@ -22,6 +22,14 @@ public class UserDTO {
         this.id = id;
         this.username = username;
         this.phrases = phrases;
+    }
+
+    public UserDTO(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.phrases = user.getPhrases();
+        this.allFollowers = user.getAllFollowers();
+        this.allFollowing = user.getAllFollowing();
     }
 
     public Long getId() {
@@ -48,28 +56,26 @@ public class UserDTO {
         this.phrases = phrases;
     }
 
-    public String getPassword() {
-        return password;
+    public List<Map<String, Object>> getAllFollowers() {
+        return allFollowers;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAllFollowers(List<Map<String, Object>> allFollowers) {
+        this.allFollowers = allFollowers;
     }
 
-    public Integer getRoleId() {
-        return roleId;
+    public List<Map<String, Object>> getAllFollowing() {
+        return allFollowing;
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    public void setAllFollowing(List<Map<String, Object>> allFollowing) {
+        this.allFollowing = allFollowing;
     }
 
-    public boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    @Override
+    public String toString() {
+        return "UserDTO [id=" + id + ", username=" + username + ", phrases=" + phrases + ", allFollowers="
+                + allFollowers + ", allFollowing=" + allFollowing + "]";
     }
 
 }

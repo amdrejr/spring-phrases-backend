@@ -72,4 +72,8 @@ public class AuthenticationService {
 
         return signin(userCredentials);
     }
+
+    public Boolean validateToken(String token) {
+        return jwtService.validateToken(token);
+    }
 }

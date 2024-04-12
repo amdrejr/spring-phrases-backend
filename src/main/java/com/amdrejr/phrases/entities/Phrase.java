@@ -12,6 +12,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,7 +29,7 @@ public class Phrase {
     @ManyToOne @JsonIgnore private User user;
     private String text;
     private Date date;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<User> usersLiked = new HashSet<>();
 
@@ -85,8 +86,11 @@ public class Phrase {
         this.usersLiked.remove(user);
     }
 
-    public String getAuthor() {
-        return user.getUsername();
+    public Map<String, Object> getAuthor() {
+        HashMap<String, Object> mapa = new HashMap<>();
+        mapa.put("id", user.getId());
+        mapa.put("username", user.getUsername());
+        return mapa;
     }
 
     public Set<User> getUsersLiked() {
