@@ -3,10 +3,8 @@ package com.amdrejr.phrases.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.amdrejr.phrases.entities.Phrase;
 import com.amdrejr.phrases.entities.User;
@@ -19,8 +17,7 @@ public class PhraseDTO implements Serializable {
     private String text;
     private String date;
     private Integer likes;
-    @JsonIgnore
-    private Set<User> usersLiked = new HashSet<>();
+    private List<Map<String, Object>> likedByUsers = new ArrayList<>();
 
     public PhraseDTO() { }
 
@@ -37,8 +34,7 @@ public class PhraseDTO implements Serializable {
         this.user = phrase.getUser();
         this.text = phrase.getText();
         this.date = phrase.getDate().toString();
-        this.likes = phrase.getUsersLiked().size();
-        this.usersLiked = phrase.getUsersLiked();
+        this.likes = phrase.getLikedByUsers().size();
     }
 
     @Override
@@ -84,13 +80,6 @@ public class PhraseDTO implements Serializable {
         this.likes = likes;
     }
 
-    public Set<User> getUsersLiked() {
-        return usersLiked;
-    }
-
-    public void setUsersLiked(Set<User> usersLiked) {
-        this.usersLiked = usersLiked;
-    }
 
     public User getUser() {
         return user;
@@ -107,17 +96,12 @@ public class PhraseDTO implements Serializable {
         return mapa;
     }
 
-    public List<Map<String, Object>> getAllUsersLiked() {
-        // Evitar recursão infinita
-        List<Map<String, Object>> usersLiked = new ArrayList<>();
-
-        for (User user : this.usersLiked) {
-            Map<String, Object> userMap = new HashMap<>();
-            userMap.put("id", user.getId());
-            userMap.put("username", user.getUsername());
-            usersLiked.add(userMap);
-        }
-
-        return usersLiked;
+    public List<Map<String, Object>> getLikedByUsers() {
+        return likedByUsers;
     }
+
+    public void setLikedByUsers(List<Map<String, Object>> likedByUsers) {
+        this.likedByUsers = likedByUsers;
+    }
+    
 }

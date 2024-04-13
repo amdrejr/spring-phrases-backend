@@ -12,26 +12,38 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.transaction.Transactional;
 
 @Entity
 @Table(name = "phrases")
+@Transactional
 public class Phrase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne @JsonIgnore private User user;
+
+    @ManyToOne @JsonIgnore 
+    private User user;
+    
     private String text;
     private Date date;
-    @ManyToMany(fetch = FetchType.EAGER)
+
     @JsonIgnore
-    private Set<User> usersLiked = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+        name = "phrases_users_liked",
+        joinColumns = @JoinColumn(name = "phrase_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> likedByUsers = new HashSet<>();
 
     public Phrase() { }
 
@@ -75,15 +87,7 @@ public class Phrase {
     }
 
     public Integer getLikes() {
-        return usersLiked.size();
-    }
-
-    public void addLikeByUserId(User user) {
-        this.usersLiked.add(user);
-    }
-    
-    public void removeLikeByUserId() {
-        this.usersLiked.remove(user);
+        return likedByUsers.size();
     }
 
     public Map<String, Object> getAuthor() {
@@ -93,27 +97,48 @@ public class Phrase {
         return mapa;
     }
 
-    public Set<User> getUsersLiked() {
-        return usersLiked;
+    public Set<User> getLikedByUsers() {
+        return likedByUsers;
     }
 
-    public List<Map<String, Object>> getAllUsersLiked() {
-        // Evitar recursão infinita
-        List<Map<String, Object>> usersLiked = new ArrayList<>();
+    public void setLikedByUsers(Set<User> likedByUsers) {
+        this.likedByUsers = likedByUsers;
+    }
 
-        for (User user : this.usersLiked) {
+    public List<Map<String, Object>> getUsersLiked() {
+        List <Map<String, Object>> usersLiked = new ArrayList<>();
+
+        for (User user : likedByUsers) {
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("id", user.getId());
             userMap.put("username", user.getUsername());
             usersLiked.add(userMap);
         }
-
         return usersLiked;
     }
 
-    // public void setUsersLiked(Set<Long> usersLiked) {
-    //     this.usersLiked = usersLiked;
-    // }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
 
-
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Phrase other = (Phrase) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
 }

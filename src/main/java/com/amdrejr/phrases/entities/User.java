@@ -55,12 +55,13 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Role> roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    // @JsonManagedReference
+    @JsonIgnore
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Phrase> phrases;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
         name = "user_following",
         joinColumns = @JoinColumn(name = "user_id"),
@@ -69,9 +70,12 @@ public class User implements UserDetails {
     private Set<User> following = new HashSet<>();
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "following")
+    @ManyToMany(
+        fetch = FetchType.EAGER, 
+        mappedBy = "following", 
+        cascade = CascadeType.ALL
+    )
     private Set<User> followers = new HashSet<>();
-
 
     public User() { }
 

@@ -62,7 +62,7 @@ public class AuthenticationService {
         
         newUser.setUsername(userCredentials.getUsername());
         newUser.setPassword(encoder.encode(userCredentials.getPassword()));
-        newUser.setRoles(List.of(roleService.findById(10))); 
+        newUser.setRoles(List.of(roleService.findById(1))); 
         newUser.setAccountNonExpired(true);
         newUser.setAccountNonLocked(true);
         newUser.setCredentialsNonExpired(true);

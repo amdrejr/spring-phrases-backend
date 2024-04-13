@@ -24,6 +24,8 @@ import com.amdrejr.phrases.entities.User;
 import com.amdrejr.phrases.exceptions.customExceptions.PhrasesErrorException;
 import com.amdrejr.phrases.services.PhraseService;
 
+import jakarta.transaction.Transactional;
+
 @RestController
 @RequestMapping("/phrases")
 public class PhraseController {
@@ -47,7 +49,7 @@ public class PhraseController {
     }
     
     @PostMapping
-    public ResponseEntity<Phrase> createPhrase(@RequestBody @NonNull PhraseDTO p) {
+    public ResponseEntity<Phrase> createPhrase(@RequestBody PhraseDTO p) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase newPhrase = new Phrase();
 
@@ -60,6 +62,7 @@ public class PhraseController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> deletePhrase(@PathVariable Long id) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase phrase = phraseService.findById(id);
@@ -68,7 +71,7 @@ public class PhraseController {
             throw new PhrasesErrorException("You can't delete a phrase that is not yours");
         }
 
-        phraseService.deleteById(id);
+        phraseService.delete(phrase);
         return ResponseEntity.noContent().build();
     }
 
@@ -93,13 +96,14 @@ public class PhraseController {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase phrase = phraseService.findById(id);
 
-        if(phrase.getUsersLiked().contains(actualUser)) {
-            phrase.getUsersLiked().remove(actualUser);
+        if(phrase.getLikedByUsers().contains(actualUser)) {
+            phrase.getLikedByUsers().remove(actualUser);
         } else {
-            phrase.getUsersLiked().add(actualUser);
+            phrase.getLikedByUsers().add(actualUser);
         }
 
         phraseService.save(phrase);
+
         return ResponseEntity.ok().body(phrase);
     }
 

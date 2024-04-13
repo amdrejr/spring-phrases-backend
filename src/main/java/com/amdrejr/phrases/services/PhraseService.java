@@ -28,8 +28,8 @@ public class PhraseService {
             .orElseThrow(() -> new PhrasesErrorException("Phrase not found, id: " + id));
     }
 
-    public void deleteById(Long id) {
-        repository.deleteById(id);
+    public void delete(Phrase p) {
+        repository.delete(p);
     }
 
     public Phrase update(Phrase p) {
