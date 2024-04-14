@@ -165,6 +165,10 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
+    public void setPhrases(List<Phrase> phrases) {
+        this.phrases = phrases;
+    }
+
     public List<Phrase> getPhrases() {
         return phrases;
     }
@@ -264,7 +268,10 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", username=" + username + ", enabled=" + enabled + ", roles=" + roles + "]";
+        return "User [id=" + id + ", username=" + username + ", roles=" + roles + ", phrases=" + phrases
+                + ", following=" + following + ", followers=" + followers + "]";
     }
+
+   
 
 }

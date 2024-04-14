@@ -82,7 +82,7 @@ public class UserController {
         newUser.setCredentialsNonExpired(true);
         newUser.setEnabled(true);
         
-        userService.save(newUser);
+        userService.create(newUser);
 
         return ResponseEntity.ok().body(new UserDTO(newUser));
     }
@@ -134,18 +134,15 @@ public class UserController {
 
         if(actualUser.getFollowing().contains(user)) {
             actualUser.getFollowing().remove(user);
-            user.getFollowers().remove(actualUser);
         } else {
             actualUser.getFollowing().add(user);
-            user.getFollowers().add(actualUser);
         }
         
-        userService.update(user);
         userService.update(actualUser);
 
-        UserDTO userBack = new UserDTO(userService.findById(actualUser.getId()));
+        // UserDTO userBack = new UserDTO(userService.findById(actualUser.getId()));
 
-        return ResponseEntity.ok().body(userBack);
+        return ResponseEntity.ok().body(new UserDTO(actualUser));
     }
 }
 

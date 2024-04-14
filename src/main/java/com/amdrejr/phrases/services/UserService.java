@@ -14,9 +14,13 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
-    public void save(User u) {
+    public void create(User u) {
         if(repository.findByUsername(u.getUsername()) == null)
             repository.save(u);
+    }
+    
+    public void save(User u) {
+        repository.save(u);
     }
 
     // public void save(UserDTO u) {
@@ -53,6 +57,7 @@ public class UserService {
         entity.setRoles(u.getRoles());
         entity.setFollowers(u.getFollowers());
         entity.setFollowing(u.getFollowing());
+        entity.setPhrases(u.getPhrases());
 
         repository.save(entity);
         return entity;
