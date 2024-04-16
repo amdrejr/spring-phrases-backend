@@ -1,11 +1,15 @@
 package com.amdrejr.phrases.services;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.amdrejr.phrases.entities.Phrase;
+import com.amdrejr.phrases.entities.User;
 import com.amdrejr.phrases.exceptions.customExceptions.PhrasesErrorException;
 import com.amdrejr.phrases.repositories.PhraseRepository;
 
@@ -19,8 +23,14 @@ public class PhraseService {
         repository.save(p);
     }
 
-    public List<Phrase> findAll() {
-        return repository.findAll();
+    public Page<Phrase> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findAll(pageable);
+    }
+
+    public Page<Phrase> findPhrasesByFollowingUsers(Set<User> followingUsers, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findPhrasesByFollowingUsers(followingUsers, pageable);
     }
 
     public Phrase findById(Long id) {
@@ -42,10 +52,8 @@ public class PhraseService {
         return entity;
     }
     
-    public List<Phrase> findByUserId(Long userId) {
-        List<Phrase> phrases = repository.findAll().stream()
-            .filter(p -> p.getUser().getId() == userId)
-            .toList();
-        return phrases;
+    public Page<Phrase> findByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findByUserId(userId, pageable);
     }
 }

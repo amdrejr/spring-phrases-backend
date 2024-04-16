@@ -1,12 +1,10 @@
 package com.amdrejr.phrases.controllers;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amdrejr.phrases.dto.PhraseDTO;
@@ -34,37 +33,39 @@ public class PhraseController {
     private PhraseService phraseService;
 
     @GetMapping
-    public ResponseEntity<List<PhraseDTO>> getAllPhrases() {
+    public ResponseEntity<Page<PhraseDTO>> getAllPhrases(
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<Phrase> phrasesPage = phraseService.findAll(page, size);
+        Page<PhraseDTO> phraseDTOPage = phrasesPage.map(phrase -> new PhraseDTO(phrase));
 
-        List<PhraseDTO> phrases = new ArrayList<>();
-
-        phraseService.findAll().stream().forEach(phrase -> {
-            phrases.add(new PhraseDTO(phrase));
-        });
-
-        return ResponseEntity.ok().body(phrases);
+        return ResponseEntity.ok().body(phraseDTOPage);
     }
 
     @GetMapping("/{id}") // phrases by user id
-    public ResponseEntity<List<PhraseDTO>> getPhrasesByUserId(@PathVariable Long id) {
-        List<PhraseDTO> phrases = new ArrayList<>();
-
-        phraseService.findByUserId(id).stream().forEach(phrase -> {
-            phrases.add(new PhraseDTO(phrase));
-        });
+    public ResponseEntity<Page<PhraseDTO>> getPhrasesByUserId(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<PhraseDTO> phrases = phraseService
+            .findByUserId(id, page, size)
+            .map(phrase -> new PhraseDTO(phrase));
 
         return ResponseEntity.ok().body(phrases);
     }
 
     @GetMapping("/my-phrases")
-    public ResponseEntity<List<PhraseDTO>> getMyPhrases() {
+    public ResponseEntity<Page<PhraseDTO>> getMyPhrases(
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<PhraseDTO> phrases = new ArrayList<>();
-
-        phraseService.findByUserId(actualUser.getId()).stream().forEach(phrase -> {
-            phrases.add(new PhraseDTO(phrase));
-        });
+        Page<PhraseDTO> phrases = phraseService
+            .findByUserId(actualUser.getId(), page, size)
+            .map(phrase -> new PhraseDTO(phrase));
 
         return ResponseEntity.ok().body(phrases);
     }
@@ -129,15 +130,18 @@ public class PhraseController {
     }
 
     @GetMapping("/following")
-    public ResponseEntity<List<PhraseDTO>> getFollowingPhrases() {
+    public ResponseEntity<Page<PhraseDTO>> getFollowingPhrases(
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<PhraseDTO> followingPhrases = actualUser.getFollowing().stream()
-            .flatMap(u -> u.getPhrases().stream())
-            .map(PhraseDTO::new)
-            .collect(Collectors.toList());
+        Page<Phrase> followingPhrases = phraseService
+            .findPhrasesByFollowingUsers(actualUser.getFollowing(), page, size);
 
-        return ResponseEntity.ok().body(followingPhrases);
+        Page<PhraseDTO> followingPhrasesDTO = followingPhrases.map(phrase -> new PhraseDTO(phrase));
+
+        return ResponseEntity.ok().body(followingPhrasesDTO);
     }
 
 }

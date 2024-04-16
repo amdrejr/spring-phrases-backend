@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amdrejr.phrases.dto.UserDTO;
@@ -37,20 +39,14 @@ public class UserController {
 	BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getUsers() {
-        List<UserDTO> users = new ArrayList<>();
+    public ResponseEntity<Page<UserDTO>> getUsers(
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<User> usersPage = userService.findAll(page, size);
+        Page<UserDTO> userDTOPage = usersPage.map(user -> new UserDTO(user));
 
-        for(User user : userService.findAll()) {
-            UserDTO userDTO = new UserDTO();
-            userDTO.setId(user.getId());
-            userDTO.setUsername(user.getUsername());
-            userDTO.setPhrases(user.getPhrases());
-            userDTO.setAllFollowers(user.getAllFollowers());
-            userDTO.setAllFollowing(user.getAllFollowing());
-            users.add(userDTO);
-        }
-
-        return ResponseEntity.ok().body(users);
+        return ResponseEntity.ok().body(userDTOPage);
     }
 
     @GetMapping("/me")
