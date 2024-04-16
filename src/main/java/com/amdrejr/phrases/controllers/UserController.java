@@ -124,7 +124,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/follow")
-    public ResponseEntity<UserDTO> follow(@PathVariable Long id) {
+    public ResponseEntity<Boolean> follow(@PathVariable Long id) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.findById(id);
 
@@ -132,17 +132,19 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
 
+        Boolean isFollowing;
+
         if(actualUser.getFollowing().contains(user)) {
             actualUser.getFollowing().remove(user);
+            isFollowing = false;
         } else {
             actualUser.getFollowing().add(user);
+            isFollowing = true;
         }
         
         userService.update(actualUser);
 
-        // UserDTO userBack = new UserDTO(userService.findById(actualUser.getId()));
-
-        return ResponseEntity.ok().body(new UserDTO(actualUser));
+        return ResponseEntity.ok().body(isFollowing);
     }
 }
 

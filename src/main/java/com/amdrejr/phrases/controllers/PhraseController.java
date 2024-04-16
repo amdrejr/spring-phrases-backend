@@ -1,6 +1,7 @@
 package com.amdrejr.phrases.controllers;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,23 +34,43 @@ public class PhraseController {
     private PhraseService phraseService;
 
     @GetMapping
-    public ResponseEntity<List<Phrase>> getAllPhrases() {
-        return ResponseEntity.ok().body(phraseService.findAll());
+    public ResponseEntity<List<PhraseDTO>> getAllPhrases() {
+
+        List<PhraseDTO> phrases = new ArrayList<>();
+
+        phraseService.findAll().stream().forEach(phrase -> {
+            phrases.add(new PhraseDTO(phrase));
+        });
+
+        return ResponseEntity.ok().body(phrases);
     }
 
     @GetMapping("/{id}") // phrases by user id
-    public ResponseEntity<List<Phrase>> getPhrasesByUserId(@PathVariable Long id) {
-        return ResponseEntity.ok().body(phraseService.findByUserId(id));
+    public ResponseEntity<List<PhraseDTO>> getPhrasesByUserId(@PathVariable Long id) {
+        List<PhraseDTO> phrases = new ArrayList<>();
+
+        phraseService.findByUserId(id).stream().forEach(phrase -> {
+            phrases.add(new PhraseDTO(phrase));
+        });
+
+        return ResponseEntity.ok().body(phrases);
     }
 
     @GetMapping("/my-phrases")
-    public ResponseEntity<List<Phrase>> getMyPhrases() {
+    public ResponseEntity<List<PhraseDTO>> getMyPhrases() {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok().body(phraseService.findByUserId(actualUser.getId()));
+
+        List<PhraseDTO> phrases = new ArrayList<>();
+
+        phraseService.findByUserId(actualUser.getId()).stream().forEach(phrase -> {
+            phrases.add(new PhraseDTO(phrase));
+        });
+
+        return ResponseEntity.ok().body(phrases);
     }
     
     @PostMapping
-    public ResponseEntity<Phrase> createPhrase(@RequestBody PhraseDTO p) {
+    public ResponseEntity<PhraseDTO> createPhrase(@RequestBody PhraseDTO p) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase newPhrase = new Phrase();
 
@@ -58,7 +79,7 @@ public class PhraseController {
         newPhrase.setDate(Date.from(Instant.now()));
         
         phraseService.save(newPhrase);
-        return ResponseEntity.ok().body(newPhrase);
+        return ResponseEntity.ok().body(new PhraseDTO(newPhrase));
     }
 
     @DeleteMapping("/{id}")
@@ -76,7 +97,7 @@ public class PhraseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Phrase> updatePhrase(@RequestBody @NonNull PhraseDTO p) {
+    public ResponseEntity<PhraseDTO> updatePhrase(@RequestBody @NonNull PhraseDTO p) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase phrase = phraseService.findById(p.getId());
 
@@ -88,11 +109,11 @@ public class PhraseController {
         phrase.setDate(Date.from(Instant.now()));
 
         phraseService.save(phrase);
-        return ResponseEntity.ok().body(phrase);
+        return ResponseEntity.ok().body(new PhraseDTO(phrase));
     }
 
     @PutMapping("/{id}/like")
-    public ResponseEntity<Phrase> likePhrase(@PathVariable Long id) {
+    public ResponseEntity<PhraseDTO> likePhrase(@PathVariable Long id) {
         User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Phrase phrase = phraseService.findById(id);
 
@@ -104,7 +125,7 @@ public class PhraseController {
 
         phraseService.save(phrase);
 
-        return ResponseEntity.ok().body(phrase);
+        return ResponseEntity.ok().body(new PhraseDTO(phrase));
     }
 
     @GetMapping("/following")

@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -61,7 +60,7 @@ public class User implements UserDetails {
     private List<Phrase> phrases;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_following",
         joinColumns = @JoinColumn(name = "user_id"),
@@ -72,8 +71,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @ManyToMany(
         fetch = FetchType.EAGER, 
-        mappedBy = "following", 
-        cascade = CascadeType.ALL
+        mappedBy = "following"
     )
     private Set<User> followers = new HashSet<>();
 
@@ -266,12 +264,9 @@ public class User implements UserDetails {
         return true;
     }
 
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", username=" + username + ", roles=" + roles + ", phrases=" + phrases
-                + ", following=" + following + ", followers=" + followers + "]";
-    }
-
-   
-
+    // @Override
+    // public String toString() {
+    //     return "User [id=" + id + ", username=" + username + ", roles=" + roles + ", phrases=" + phrases
+    //             + ", following=" + following + ", followers=" + followers + "]";
+    // }
 }

@@ -32,7 +32,7 @@ public class InitialConfig implements CommandLineRunner {
 
         User admin = createUser("admin", "admin", Arrays.asList(roleService.findById(2)));
 
-        userService.save(admin);
+        userService.create(admin);
     }
 
     private User createUser(String username, String password, List<Role> roles) {

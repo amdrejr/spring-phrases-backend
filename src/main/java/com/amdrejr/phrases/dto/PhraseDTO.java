@@ -35,6 +35,7 @@ public class PhraseDTO implements Serializable {
         this.text = phrase.getText();
         this.date = phrase.getDate().toString();
         this.likes = phrase.getLikedByUsers().size();
+        this.likedByUsers = phrase.getUsersLiked();
     }
 
     @Override

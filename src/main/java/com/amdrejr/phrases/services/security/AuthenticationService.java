@@ -68,7 +68,7 @@ public class AuthenticationService {
         newUser.setCredentialsNonExpired(true);
         newUser.setEnabled(true);
         
-        userService.save(newUser);
+        userService.create(newUser);
 
         return signin(userCredentials);
     }

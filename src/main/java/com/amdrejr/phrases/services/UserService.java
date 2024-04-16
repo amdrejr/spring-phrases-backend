@@ -19,13 +19,8 @@ public class UserService {
             repository.save(u);
     }
     
-    public void save(User u) {
-        repository.save(u);
-    }
-
-    // public void save(UserDTO u) {
-    //     User user = new User(u.getUsername(), u.getPassword(), u.getRoleId());
-    //     repository.save(user);
+    // public void save(User u) {
+    //     repository.save(u);
     // }
 
     public User findByUsername(String username) {
