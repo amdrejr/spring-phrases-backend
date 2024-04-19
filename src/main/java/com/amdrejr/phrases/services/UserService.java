@@ -25,7 +25,10 @@ public class UserService {
     // }
 
     public User findByUsername(String username) {
-        return repository.findByUsername(username);
+        User user = repository.findByUsername(username);
+        if(user == null)
+            throw new RuntimeException("User not found, username: " + username);
+        return user;
     }
 
     public Page<User> findAll(Integer page, Integer size) {

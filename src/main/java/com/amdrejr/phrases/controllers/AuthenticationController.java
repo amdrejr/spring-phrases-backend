@@ -48,7 +48,7 @@ public class AuthenticationController {
         try {
             isValid = authenticationService.validateToken(token.getToken());
         } catch(Exception e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(isValid);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(isValid);
         }
 
         return ResponseEntity.ok().body(isValid);

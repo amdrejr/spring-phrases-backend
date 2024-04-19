@@ -1,7 +1,10 @@
 package com.amdrejr.phrases.controllers;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,7 +38,7 @@ public class PhraseController {
     @GetMapping
     public ResponseEntity<Page<PhraseDTO>> getAllPhrases(
         @RequestParam(defaultValue = "0") Integer page,
-        @RequestParam(defaultValue = "10") Integer size
+        @RequestParam(defaultValue = "5") Integer size
     ) {
         Page<Phrase> phrasesPage = phraseService.findAll(page, size);
         Page<PhraseDTO> phraseDTOPage = phrasesPage.map(phrase -> new PhraseDTO(phrase));
@@ -142,6 +145,18 @@ public class PhraseController {
         Page<PhraseDTO> followingPhrasesDTO = followingPhrases.map(phrase -> new PhraseDTO(phrase));
 
         return ResponseEntity.ok().body(followingPhrasesDTO);
+    }
+
+    // TODO: num futuro isso será paginada
+    @GetMapping("/who-liked/{id}")
+    public ResponseEntity<List<Map<String, Object>>> whoLikedPhrase (@PathVariable Long id) {
+        List<Map<String, Object>> whoLiked = new ArrayList<>();
+        
+        phraseService.findById(id).getLikedByUsers().forEach(user -> {
+            whoLiked.add(Map.of("id", user.getId(), "username", user.getUsername()));
+        });
+        
+        return ResponseEntity.ok().body(whoLiked);
     }
 
 }

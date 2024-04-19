@@ -1,10 +1,12 @@
 package com.amdrejr.phrases.dto;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.amdrejr.phrases.entities.Phrase;
 import com.amdrejr.phrases.entities.User;
@@ -17,8 +19,10 @@ public class PhraseDTO implements Serializable {
     private String text;
     private String date;
     private Integer likes;
-    private List<Map<String, Object>> likedByUsers = new ArrayList<>();
-
+    // private List<Map<String, Object>> likedByUsers = new ArrayList<>();
+    @JsonIgnore
+    private Set<User> likedByUsers = new HashSet<>();
+    
     public PhraseDTO() { }
 
     public PhraseDTO(Long id, User user, String text, String date, Integer likes) {
@@ -35,7 +39,8 @@ public class PhraseDTO implements Serializable {
         this.text = phrase.getText();
         this.date = phrase.getDate().toString();
         this.likes = phrase.getLikedByUsers().size();
-        this.likedByUsers = phrase.getUsersLiked();
+        // this.likedByUsers = phrase.getUsersLiked();
+        this.likedByUsers = phrase.getLikedByUsers();
     }
 
     @Override
@@ -97,12 +102,25 @@ public class PhraseDTO implements Serializable {
         return mapa;
     }
 
-    public List<Map<String, Object>> getLikedByUsers() {
+    // public List<Map<String, Object>> getLikedByUsers() {
+    //     return likedByUsers;
+    // }
+
+    // public void setLikedByUsers(List<Map<String, Object>> likedByUsers) {
+    //     this.likedByUsers = likedByUsers;
+    // }
+    
+    public Set<User> getLikedByUsers() {
         return likedByUsers;
     }
 
-    public void setLikedByUsers(List<Map<String, Object>> likedByUsers) {
+    public void setLikedByUsers(Set<User> likedByUsers) {
         this.likedByUsers = likedByUsers;
+    }
+
+    public boolean getIsLikedByMe() {
+        User actualUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return likedByUsers.contains(actualUser);
     }
     
 }

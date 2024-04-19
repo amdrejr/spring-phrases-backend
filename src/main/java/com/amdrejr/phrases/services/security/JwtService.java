@@ -26,7 +26,7 @@ public class JwtService {
             .withIssuer("login-api")
             .withSubject(user.getUsername())
             .withClaim("id", user.getId())
-            .withExpiresAt( LocalDateTime.now().plusMinutes(60).toInstant(ZoneOffset.of("-03:00")) )
+            .withExpiresAt( LocalDateTime.now().plusDays(7).toInstant(ZoneOffset.of("-03:00")) )
             .sign(Algorithm.HMAC256(chaveUltraSecreta));
     }
    

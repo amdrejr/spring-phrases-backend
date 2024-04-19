@@ -56,6 +56,7 @@ public class UserDTO implements Serializable {
         this.phrases = phrases;
     }
 
+    // TODO: paginar isso
     public List<Map<String, Object>> getAllFollowers() {
         return allFollowers;
     }
@@ -64,6 +65,7 @@ public class UserDTO implements Serializable {
         this.allFollowers = allFollowers;
     }
 
+    // TODO: paginar isso
     public List<Map<String, Object>> getAllFollowing() {
         return allFollowing;
     }

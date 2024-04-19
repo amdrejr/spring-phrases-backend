@@ -98,6 +98,7 @@ public class Phrase {
         return mapa;
     }
 
+    // TODO: paginar isso
     public Set<User> getLikedByUsers() {
         return likedByUsers;
     }

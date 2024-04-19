@@ -62,6 +62,11 @@ public class UserController {
         return ResponseEntity.ok().body(new UserDTO(userService.findById(id)));
     }
 
+    @GetMapping("/search/{username}")
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok().body(new UserDTO(userService.findByUsername(username)));
+    }
+
     @PostMapping // testar se está funcionando corretamente
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserDTO> create(@RequestBody @NonNull User user) {
