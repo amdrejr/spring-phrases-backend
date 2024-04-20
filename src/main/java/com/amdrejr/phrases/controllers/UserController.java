@@ -1,7 +1,9 @@
 package com.amdrejr.phrases.controllers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -146,6 +148,43 @@ public class UserController {
         userService.update(actualUser);
 
         return ResponseEntity.ok().body(isFollowing);
+    }
+
+    @GetMapping("/followers/{id}")
+    public ResponseEntity<Page<Map<String, Object>>> getFollowers(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    
+    ) {
+        Page<User> followers = userService.findFollowersByUserId(id, page, size);
+        
+        Page<Map<String, Object>> followersDTO = followers.map(follower -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", follower.getId());
+            map.put("username", follower.getUsername());
+            return map;
+        });
+
+        return ResponseEntity.ok().body(followersDTO);
+    }
+
+    @GetMapping("/following/{id}")
+    public ResponseEntity<Page<Map<String, Object>>> getFollowing(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<User> following = userService.findFollowingByUserId(id, page, size);
+        
+        Page<Map<String, Object>> followingDTO = following.map(followingUser -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", followingUser.getId());
+            map.put("username", followingUser.getUsername());
+            return map;
+        });
+
+        return ResponseEntity.ok().body(followingDTO);
     }
 }
 

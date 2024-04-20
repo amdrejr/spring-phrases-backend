@@ -26,8 +26,8 @@ public class UserService {
 
     public User findByUsername(String username) {
         User user = repository.findByUsername(username);
-        if(user == null)
-            throw new RuntimeException("User not found, username: " + username);
+        // if(user == null)
+        //     throw new RuntimeException("User not found, username: " + username);
         return user;
     }
 
@@ -61,5 +61,15 @@ public class UserService {
 
         repository.save(entity);
         return entity;
+    }
+
+    public Page<User> findFollowersByUserId(Long userId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findFollowersByUserId(userId, pageable);
+    }
+
+    public Page<User> findFollowingByUserId(Long userId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findFollowingByUserId(userId, pageable);
     }
 }
