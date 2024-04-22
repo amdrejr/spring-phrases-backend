@@ -52,8 +52,13 @@ public class PhraseService {
         return entity;
     }
     
-    public Page<Phrase> findByUserId(Long userId, int page, int size) {
+    public Page<Phrase> findByUserId(Long userId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         return repository.findByUserId(userId, pageable);
+    }
+
+    public Page<User> findWhoLikedPhrase(Long phraseId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findUsersLikedByPhraseId(phraseId, pageable);
     }
 }

@@ -1,9 +1,8 @@
 package com.amdrejr.phrases.controllers;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,16 +146,24 @@ public class PhraseController {
         return ResponseEntity.ok().body(followingPhrasesDTO);
     }
 
-    // TODO: num futuro isso será paginada
     @GetMapping("/who-liked/{id}")
-    public ResponseEntity<List<Map<String, Object>>> whoLikedPhrase (@PathVariable Long id) {
-        List<Map<String, Object>> whoLiked = new ArrayList<>();
+    public ResponseEntity<Page<Map<String, Object>>> whoLikedPhrase (
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer page,
+        @RequestParam(defaultValue = "10") Integer size
+    ) {
+        Page<User> whoLiked = phraseService.findWhoLikedPhrase(id, page, size);
+
+        Page<Map<String, Object>> whoLikedList = whoLiked.map(
+            user -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", user.getId());
+            map.put("username", user.getUsername());
+            return map;
+            } 
+        );
         
-        phraseService.findById(id).getLikedByUsers().forEach(user -> {
-            whoLiked.add(Map.of("id", user.getId(), "username", user.getUsername()));
-        });
-        
-        return ResponseEntity.ok().body(whoLiked);
+        return ResponseEntity.ok().body(whoLikedList);
     }
 
 }

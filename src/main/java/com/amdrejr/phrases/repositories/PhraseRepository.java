@@ -17,6 +17,9 @@ public interface PhraseRepository extends JpaRepository<Phrase, Long>{
     Page<Phrase> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT p FROM Phrase p WHERE p.user IN (:followingUsers)")
-    Page<Phrase> findPhrasesByFollowingUsers(@Param("followingUsers") Set<User> followingUsers, Pageable pageable);;
+    Page<Phrase> findPhrasesByFollowingUsers(@Param("followingUsers") Set<User> followingUsers, Pageable pageable);
 
+    // @Query("SELECT p.likedByUsers FROM Phrase p WHERE p.id = :phraseId")
+    @Query("SELECT DISTINCT u FROM Phrase p JOIN p.likedByUsers u WHERE p.id = :phraseId")
+    Page<User> findUsersLikedByPhraseId(@Param("phraseId") Long phraseId, Pageable pageable);
 }
